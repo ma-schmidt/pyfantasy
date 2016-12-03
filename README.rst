@@ -23,7 +23,7 @@ The first step is to create a FantasyAPI object.
 
 	>>> fapi = FantasyAPI('cred.json')
 
-This will do many things. First, it will log you into yahoo's two step autentication process. Second, it will give you access to the `get` method to retrieve any available data. Third, it will automatically store basic data related to the fantasy teams owned by the credentials passed.
+This will do many things. First, it will log you into yahoo's two step autentication process. Second, it will give you access to the :code:`get` method to retrieve any available data. Third, it will automatically store basic data related to the fantasy teams owned by the credentials passed.
 
 You can then use this information to modify or view a particular team
 
@@ -50,6 +50,6 @@ You can then use this information to modify or view a particular team
 	<Player: G    - John Gibson (G)>
 	<Player: BN   - Jonathan Bernier (G)>
 
-The most advanced feature of this package is certainly the possibility to compute the "optimal" lineup assignment. Using a maximum weighted matching algorithm, the method `start_active` creates the optimal assignment between your players and the available positions. It prioritizes healthy players that are playing on that day. Furthermore, it uses the average draft pick of a player to order between them if some players need to be benched.
+The most advanced feature of this package is certainly the possibility to compute the "optimal" lineup assignment. Using a maximum weighted matching algorithm, the method :code:`start_active` creates the optimal assignment between your players and the available positions. It prioritizes healthy players that are playing on that day. Furthermore, it uses the average draft pick of a player to order between them if some players need to be benched.
 
 Unfortunately, the documentation is currently extremelly sparse and below any reasonable standards. Sorry.
