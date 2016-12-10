@@ -358,7 +358,7 @@ class Team:
                 for pos in player.eligible_positions + ['BN']:
                     weight = 1000 - player.rank
                     # Prefer if Util is not used (if possible)
-                    if pos == 'Util':
+                    if (pos == 'Util') & ('D' in player.eligible_positions):
                         weight -= 10
                     # If player is injured
                     if player.status != 'OK':
