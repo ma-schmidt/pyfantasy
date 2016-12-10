@@ -313,7 +313,7 @@ class Team:
         r.raise_for_status()
         return r
 
-    def start_active(self, playing_teams, rules):
+    def start_active(self, rules, playing_teams):
         """ Create an optimal assignment between players and positions.
 
         Takes the list of player and creates a weighted bipartite graph.

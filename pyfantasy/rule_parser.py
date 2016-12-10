@@ -39,7 +39,6 @@ def _check_conditions(player, pos, playing_teams, conds):
 def rule_parser(weight, player, pos, playing_teams, rules):
     for rule in rules:
         if _check_conditions(player, pos, playing_teams, rule['conditions']):
-            print 'relative'
             if rule['weight'].get('type', 'absolute') == 'relative':
                 weight = weight + rule['weight']['value']
             else:
