@@ -1,0 +1,73 @@
+[
+    {
+        "conditions": [
+            {
+                "type": "position",
+                "position": "Util",
+                "inverse": false
+            },
+            {
+                "type": "player",
+                "attr": "eligible_positions",
+                "value": "D",
+                "inverse": false
+            }
+        ],
+        "weight": {
+            "value": -10,
+            "type": "relative"
+        }
+    },
+    {
+        "conditions": [
+            {
+                "type": "player",
+                "attr": "status",
+                "value": "OK",
+                "inverse": true
+            }
+        ],
+        "weight": {
+            "value": 4,
+            "type": "absolute"
+        }
+    },
+    {
+        "conditions": [
+            {
+                "type": "not_playing",
+                "inverse": false
+            }
+        ],
+        "weight": {
+            "value": 3,
+            "type": "absolute"
+        }
+    },
+    {
+        "conditions": [
+            {
+                "type": "position",
+                "position": "BN",
+                "inverse": false
+            }
+        ],
+        "weight": {
+            "value": 2,
+            "type": "absolute"
+        }
+    },
+    {
+        "conditions": [
+            {
+                "type": "position",
+                "position": ["IR", "IR+"],
+                "inverse": false
+            }
+        ],
+        "weight": {
+            "value": 1,
+            "type": "absolute"
+        }
+    }
+]

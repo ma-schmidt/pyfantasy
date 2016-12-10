@@ -13,6 +13,7 @@ TODO:
 from __future__ import absolute_import
 
 from .yahoo_oauth import OAuth2
+from .rule_parser import rule_parser
 from xmltodict import parse
 import time
 from datetime import datetime, date, timedelta
@@ -312,7 +313,7 @@ class Team:
         r.raise_for_status()
         return r
 
-    def start_active(self, playing_teams):
+    def start_active(self, playing_teams, rules):
         """ Create an optimal assignment between players and positions.
 
         Takes the list of player and creates a weighted bipartite graph.
@@ -357,24 +358,12 @@ class Team:
         for player in self.players:
             for pos_u in pos_list:
                 for pos in player.eligible_positions + ['BN']:
-                    weight = 1000 - player.rank
-                    # Prefer if Util is not used (if possible)
-                    if (pos == 'Util') & ('D' in player.eligible_positions):
-                        weight -= 10
-                    # If player is injured
-                    if player.status != 'OK':
-                        weight = 4
-                    # If player does not play tonight
-                    if player.nhl_team not in playing_teams:
-                        weight = 3
-                    # If edge is for the bench
-                    if pos == 'BN':
-                        weight = 2
-                    # If edge is for IR or IR+
-                    if pos in ['IR', 'IR+']:
-                        weight = 1
-
                     if pos_u[0] == pos:
+                        # Initial weight rule
+                        weight = 1000 - player.rank
+                        # Apply the rules to modify the weight
+                        weight = rule_parser(weight, player, pos, playing_teams, rules)
+                        # Add the edge with the weight
                         G.add_edge(pos_u, player.name['full'], weight=weight)
 
                 # If player is on IR or IR+ spot, keep it there
@@ -384,17 +373,6 @@ class Team:
                     G.add_edge(pos_u, player.name['full'], weight=1001)
 
         best = nx.max_weight_matching(G)
-
-        # # Create a roster change list.
-        # # Elements are tuples of (Player, old position, new position)
-        # update_data = []
-        # for player in self.players:
-        #     new = best[player.name['full']][0]
-        #     if player.selected_position != new:
-        #         update_data.append((player, player.selected_position, new))
-
-        # if len(update_data) > 0:
-        #     self.update_roster(update_data)
 
         return best
 
