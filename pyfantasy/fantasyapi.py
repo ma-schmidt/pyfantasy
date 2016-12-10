@@ -288,7 +288,8 @@ class Team:
                 update_data.append((player, player.selected_position, new))
 
         if len(update_data) == 0:
-            return 'No update to be done!'
+            print('No update to be done!')
+            return
 
         # Message
         header = ('<?xml version="1.0"?> <fantasy_content> <roster>'
@@ -296,7 +297,7 @@ class Team:
         footer = '</roster> </fantasy_content>'
         date_str = '<date>{}</date>'.format(time.strftime("%Y-%m-%d"))
         players_str = '<players>'
-        for player, old_pos, new_pos in data:
+        for player, old_pos, new_pos in update_data:
             players_str += ('<player> <player_key>{}</player_key> <position>{}'
                             '</position> </player>'.format(player.player_key, new_pos))
         players_str += '</players>'
