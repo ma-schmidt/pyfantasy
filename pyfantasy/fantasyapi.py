@@ -278,6 +278,19 @@ class Team:
 
         See: https://developer.yahoo.com/fantasysports/guide/roster-resource.html
         """
+
+        # Create a roster change list.
+        # Elements are tuples of (Player, old position, new position)
+        update_data = []
+        for player in self.players:
+            new = data[player.name['full']][0]
+            if player.selected_position != new:
+                update_data.append((player, player.selected_position, new))
+
+        if len(update_data) == 0:
+            return 'No update to be done!'
+
+        # Message
         header = ('<?xml version="1.0"?> <fantasy_content> <roster>'
                   '<coverage_type>date</coverage_type>')
         footer = '</roster> </fantasy_content>'
@@ -317,7 +330,7 @@ class Team:
             import networkx as nx
         except ImportError:
             raise ImportError('Could not import package networkx. This package is '
-                              'necessary to compute the optimal allocation.'  )
+                              'necessary to compute the optimal allocation.')
 
         # rank is necessary
         if not self._get_rank:
@@ -344,6 +357,9 @@ class Team:
             for pos_u in pos_list:
                 for pos in player.eligible_positions + ['BN']:
                     weight = 1000 - player.rank
+                    # Prefer if Util is not used (if possible)
+                    if pos == 'Util':
+                        weight -= 10
                     # If player is injured
                     if player.status != 'OK':
                         weight = 4
@@ -368,18 +384,18 @@ class Team:
 
         best = nx.max_weight_matching(G)
 
-        # Create a roster change list.
-        # Elements are tuples of (Player, old position, new position)
-        update_data = []
-        for player in self.players:
-            new = best[player.name['full']][0]
-            if player.selected_position != new:
-                update_data.append((player, player.selected_position, new))
+        # # Create a roster change list.
+        # # Elements are tuples of (Player, old position, new position)
+        # update_data = []
+        # for player in self.players:
+        #     new = best[player.name['full']][0]
+        #     if player.selected_position != new:
+        #         update_data.append((player, player.selected_position, new))
 
-        if len(update_data) > 0:
-            self.update_roster(update_data)
+        # if len(update_data) > 0:
+        #     self.update_roster(update_data)
 
-        return update_data
+        return best
 
     def __repr__(self):
         return u'<Team: {} - {}>'.format(self.name, self.league.name)
