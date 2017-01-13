@@ -26,7 +26,7 @@ except ImportError:
     threads = False
 
 
-class FantasyAPI:
+class Connection:
     """ Instantiation of the API communication and retrieve basic fantasy team info
     Attributes:
     - filepath: path to the json file containing the credentials as outline in the
@@ -36,29 +36,44 @@ class FantasyAPI:
     """
 
     def __init__(self, filepath, game_key='nhl'):
-        self.oauth = OAuth2(None, None, from_file=filepath)
+        self.credentials_path = filepath
+        self.login(filepath)
         self.game_key = game_key
-        # self._get_league_info()
-        self._get_info()
+
+    def login(self, filepath):
+        self.oauth = OAuth2(None, None, from_file=filepath)
 
     def get(self, url):
         """ Retrieves API info and parses it.
         Returns: [dict] parsed data
-        TODO: Error handling
         """
+        # remove url prefix to avoid duplicate
+        url = url.lstrip('/')
+        start_check = 'fantasy/v2/'
+        if url.startswith(start_check):
+            url = url[len(start_check):]
+
+        # REQUESTS
         base_url = 'https://fantasysports.yahooapis.com/fantasy/v2/'
         r = self.oauth.session.get(base_url + url)
+
+        # If the requests is refused, try to reconnect and retry
+        if r.status_code in [401, 403]:
+            self.login(self.credentials_path)
+            r = self.oauth.session.get(base_url + url)
+
+        # If the request is still refused, raise error!
         r.raise_for_status()
+
         return parse(r.text)['fantasy_content']
 
     def raw_get(self, url):
-        """ Retrieves API info and parses it.
-        Returns: [dict] parsed data
-        TODO: Error handling
+        """ Retrieves API info.
+        Returns: raw text response
         """
         return self.oauth.session.get(url)
 
-    def _get_info(self):
+    def user_info(self):
         """ Retrieves current user teams' name and team_key.
         Set the attribute team: OrderedDict(name:team_key)
 
@@ -69,7 +84,7 @@ class FantasyAPI:
         d_team = self.get(url1)['users']['user']['games']['game']
         url2 = 'users;use_login=1/games;game_keys={}/leagues'.format(self.game_key)
         d_league = self.get(url2)['users']['user']['games']['game']
-        self.teams = []
+        teams = []
         number_teams = int(d_team['teams']['@count'])
         number_leagues = int(d_league['leagues']['@count'])
 
@@ -77,7 +92,7 @@ class FantasyAPI:
             raise NotImplemented('Number of teams not equal to the number of leagues')
 
         if number_teams == 1:
-            self.teams = [
+            teams = [
                 BasicTeam(league_name=d_league['leagues']['league']['name'],
                           league_key=d_league['leagues']['league']['league_key'],
                           team_name=d_team['teams']['team']['name'],
@@ -86,12 +101,14 @@ class FantasyAPI:
         elif number_teams > 1:
             for league, team in zip(d_league['leagues']['league'],
                                     d_team['teams']['team']):
-                self.teams.append(BasicTeam(league_name=league['name'],
-                                            league_key=league['league_key'],
-                                            team_name=team['name'],
-                                            team_key=team['team_key']))
+                teams.append(BasicTeam(league_name=league['name'],
+                                       league_key=league['league_key'],
+                                       team_name=team['name'],
+                                       team_key=team['team_key']))
         else:
             raise ValueError('User does not contain any team for the specified game')
+
+        return teams
 
     def get_team(self, team_key, get_rank=False):
         return Team(team_key, self, get_rank)

@@ -18,6 +18,25 @@
             "type": "relative"
         }
     },
+        {
+        "conditions": [
+            {
+                "type": "position",
+                "position": "Util",
+                "inverse": false
+            },
+            {
+                "type": "player",
+                "attr": "eligible_positions",
+                "value": "D",
+                "inverse": true
+            }
+        ],
+        "weight": {
+            "value": 10,
+            "type": "relative"
+        }
+    },
     {
         "conditions": [
             {
